@@ -1,0 +1,32 @@
+{
+  "name": "link-picker",
+  "version": "1.0.0",
+  "description": "Link Picker",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-js": "webpack",
+    "watch-js": "webpack --watch",
+    "lint-sass": "stylelint 'src/scss/*.scss'",
+    "compile-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/linkPicker.css",
+    "compress-css": "node-sass dist/linkPicker.css dist/linkPicker.min.css --output-style compressed",
+    "build-css": "npm-run-all compile-sass compress-css",
+    "watch-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/linkPicker.css --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "node-sass": "^4.12.0",
+    "npm-run-all": "^4.1.5",
+    "stylelint": "^10.1.0",
+    "stylelint-config-standard": "^18.3.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
+  },
+  "dependencies": {
+    "@foragefox/page-builder-util": "^1.0.4"
+  }
+}
