@@ -7,7 +7,8 @@ class LinkPicker {
 		
 		this.$body = $('body');
 		
-		this.init();		
+		this.init();
+		this.populate();
 	}
 
 	init() {
@@ -34,7 +35,7 @@ class LinkPicker {
 		//this.populateLinkList();
 		this.$element.show().addClass('open');
 		$(document).off('focusin.modal');
-	}	
+	}
 	
 	close() {
 		this.$element.remove();
@@ -46,12 +47,19 @@ class LinkPicker {
 		this.close();
 	}
 
+	populate() {
+		if (this.options.link.url) {
+			Util.formFromJSON(this.$element.find('.link-form'), this.options.link);
+		}
+	}
+
 }
 
 
 LinkPicker.DEFAULTS = {
 	endpoint: '',
 	selectCallback: function(result) {},
+	link: {},
 	templates: {
 		container: `<div class="link-picker fade"></div>`,
 		linkItem: `
