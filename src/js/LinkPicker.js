@@ -7,32 +7,35 @@ class LinkPicker {
 		
 		this.$body = $('body');
 		
-		this.init();
-		this.populate();
-	}
-
-	init() {
 		this.initModal();
 		this.bindEvents();
+		this.populate();
 	}
 	
 	initModal() {
 		var linkForm = Util.supplant(this.options.templates.linkForm);
-		var modal = Util.supplant(this.options.templates.modal, { linkForm: linkForm });
+		var existingContent = this.options.enableExistingContent ? Util.supplant(this.options.templates.existingContent) : '';
+		var modal = Util.supplant(this.options.templates.modal, { linkForm: linkForm, existingContent: existingContent });
 
 		this.$element = $(this.options.templates.container);
 		this.$element.append(modal);
 		
 		this.$body.append(this.$element);
+
+		this.contentList = this.$element.find('.results-list-content ul');
+		this.sectionList = this.$element.find('.results-list-section ul');
 	}
 	
 	bindEvents() {
 		this.$element.on('click', '[data-action=close]', this.close.bind(this));
 		this.$element.on('click', '[data-action=add-link]', this.addLink.bind(this));
+		this.$element.on('input', '[data-action=search-content]', this.populateContent.bind(this));
+		this.$element.on('click', '.results-list li', this.selectLink.bind(this));
 	}
 	
 	open() {
-		//this.populateLinkList();
+		this.populateSection();
+
 		this.$element.show().addClass('open');
 		$(document).off('focusin.modal');
 	}
@@ -53,13 +56,67 @@ class LinkPicker {
 		}
 	}
 
+	selectLink(event) {
+		let item = event.target;
+		let link = {text: item.innerText, url: item.dataset.url};
+
+		Util.formFromJSON(this.$element.find('.link-form'), link);
+	}
+
+	populateContent(event) {
+		let value = event.target.value;
+		
+		if (value.length < 3) {
+			return;
+		}
+
+		$.ajax({
+			cache: false,
+			context: this,
+			url: this.options.endpoint,
+			data: { q: value },
+			dataType: 'json',
+			success: function (response) {
+				this.contentList.empty();
+		
+				let html = '';
+				for (let i = 0; i < response.length; i++) {
+					let link = this.options.mapData(response[i]);
+				
+					html += Util.supplant(this.options.templates.existingContentItem, link);
+				}
+
+				this.contentList.html(html);
+			},
+			error: function (error) {
+				console.log(error);
+				
+				throw error;
+			},
+		});
+
+	}
+
+	populateSection() {
+		this.sectionList.empty();
+		
+		let html = '';
+		$('[data-structure=container]').each(function(index, item) {
+			html += Util.supplant(this.options.templates.existingContentItem, {text: item.data('id'), url: '#'+item.data('id')});
+		});
+
+		this.sectionList.html(html);
+	}
+
 }
 
 
 LinkPicker.DEFAULTS = {
 	endpoint: '',
 	selectCallback: function(result) {},
+	mapData: function(data) { return data; },
 	link: {},
+	enableExistingContent: false,
 	templates: {
 		container: `<div class="link-picker fade"></div>`,
 		linkItem: `
@@ -80,6 +137,7 @@ LinkPicker.DEFAULTS = {
 				
 					<div class="link-picker-body">
 						{{linkForm}}
+						{{existingContent}}
 					</div>
 
 					<div class="link-picker-footer">
@@ -119,6 +177,42 @@ LinkPicker.DEFAULTS = {
 				</div>
 			</div>
 		`,
+		existingContent: `
+			
+			<div class="existing-content">
+
+				<p><i>Or link to existing content</i></p>
+
+				<ul class="nav nav-tabs nav-fill">
+					<li class="nav-item">
+						<a class="nav-link active" href="#lp-content" data-toggle="tab">Content</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#lp-section" data-toggle="tab">Section</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled" href="#lp-modals" tabindex="-1" aria-disabled="true" data-toggle="tab">Modals</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<div class="tab-pane fade show active" id="lp-content" role="tabpanel" aria-labelledby="home-tab">
+						<div class="results-list results-list-content">
+							<input class="form-control" data-action="search-content" value="" placeholder="search links..." />
+							<ul></ul>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="lp-section" role="tabpanel" aria-labelledby="profile-tab">
+						<div class="results-list results-list-section">
+							<ul></ul>
+						</div>
+					</div>
+				</div>
+
+				
+			</div>
+		`,
+		existingContentItem: `<li data-url="{{url}}">{{text}}</li>`
 	}
 }
 
