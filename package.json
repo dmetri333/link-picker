@@ -11,10 +11,10 @@
     "build-js": "webpack",
     "watch-js": "webpack --watch",
     "lint-sass": "stylelint 'src/scss/*.scss'",
-    "compile-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/linkPicker.css",
-    "compress-css": "node-sass dist/linkPicker.css dist/linkPicker.min.css --output-style compressed",
+    "compile-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/link-picker.css",
+    "compress-css": "node-sass dist/link-picker.css dist/link-picker.min.css --output-style compressed",
     "build-css": "npm-run-all compile-sass compress-css",
-    "watch-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/linkPicker.css --watch",
+    "watch-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/link-picker.css --watch",
     "watch-css": "watch 'npm run build-css' src/scss",
     "watch": "npm-run-all --parallel watch-js watch-css"
   },
