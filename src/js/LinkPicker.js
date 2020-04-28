@@ -102,7 +102,7 @@ class LinkPicker {
 		
 		let html = '';
 		$('[data-structure=container]').each(function(index, item) {
-			html += Util.supplant(this.options.templates.existingContentItem, { text: item.data('id'), url: '#'+item.data('id') });
+			html += Util.supplant(this.options.templates.existingContentItem, { text: item.id, url: '#'+item.id });
 		}.bind(this));
 
 		this.sectionList.html(html);
