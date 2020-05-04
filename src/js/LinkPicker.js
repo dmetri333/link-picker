@@ -66,6 +66,8 @@ class LinkPicker {
 	populateContent(event) {
 		let value = event.target.value;
 		
+		this.contentList.empty();
+		
 		if (value.length < 3) {
 			return;
 		}
@@ -77,13 +79,16 @@ class LinkPicker {
 			data: { q: value },
 			dataType: 'json',
 			success: function (response) {
-				this.contentList.empty();
-		
+				
 				let html = '';
 				for (let i = 0; i < response.length; i++) {
 					let link = this.options.mapData(response[i]);
 				
-					html += Util.supplant(this.options.templates.existingContentItem, link);
+					html += Util.supplant(this.options.templates.existingContentItem, { 
+						text: link.text,
+						subtext: link.url,
+						url: link.url
+					});
 				}
 
 				this.contentList.html(html);
@@ -102,7 +107,11 @@ class LinkPicker {
 		
 		let html = '';
 		$('[data-structure=container]').each(function(index, item) {
-			html += Util.supplant(this.options.templates.existingContentItem, { text: item.id, url: '#'+item.id });
+			html += Util.supplant(this.options.templates.existingContentItem, { 
+				text: 'Container ' + index,
+				subtext: item.id,
+				url: '#'+item.id
+			});
 		}.bind(this));
 
 		this.sectionList.html(html);
@@ -211,7 +220,7 @@ LinkPicker.DEFAULTS = {
 				
 			</div>
 		`,
-		existingContentItem: `<li data-url="{{url}}">{{text}}</li>`
+		existingContentItem: `<li class="text-truncate" data-url="{{url}}">{{text}}  <em class="text-muted small">{{subtext}}</em></li>`
 	}
 }
 
