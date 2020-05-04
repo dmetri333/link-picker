@@ -33,6 +33,8 @@
 
 .link-picker.open { 
     opacity: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .link-picker.open .link-picker-dialog {

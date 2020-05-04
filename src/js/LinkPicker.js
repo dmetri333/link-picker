@@ -178,7 +178,6 @@ LinkPicker.DEFAULTS = {
 			</div>
 		`,
 		existingContent: `
-			
 			<div class="existing-content">
 
 				<p><i>Or link to existing content</i></p>
