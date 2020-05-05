@@ -58,7 +58,7 @@ class LinkPicker {
 
 	selectLink(event) {
 		let item = event.target;
-		let link = { text: item.childNodes[0].nodeValue.trim(), url: item.dataset.url };
+		let link = { text: item.dataset.text, url: item.dataset.url };
 
 		Util.formFromJSON(this.$element.find('.link-form'), link);
 	}
@@ -220,7 +220,7 @@ LinkPicker.DEFAULTS = {
 				
 			</div>
 		`,
-		existingContentItem: `<li class="text-truncate" data-url="{{url}}">{{text}}  <em class="text-muted small">{{subtext}}</em></li>`
+		existingContentItem: `<li class="text-truncate" data-text="{{text}}" data-url="{{url}}">{{text}}  <em class="text-muted small">{{subtext}}</em></li>`
 	}
 }
 
