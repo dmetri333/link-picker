@@ -58,7 +58,7 @@ class LinkPicker {
 
 	selectLink(event) {
 		let item = event.target;
-		let link = {text: item.innerText, url: item.dataset.url};
+		let link = { text: item.childNodes[0].nodeValue.trim(), url: item.dataset.url };
 
 		Util.formFromJSON(this.$element.find('.link-form'), link);
 	}
