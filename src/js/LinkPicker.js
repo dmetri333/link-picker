@@ -57,14 +57,14 @@ class LinkPicker {
 	}
 
 	selectLink(event) {
-		let item = event.target;
+		let item = event.currentTarget;
 		let link = { text: item.dataset.text, url: item.dataset.url };
 
 		Util.formFromJSON(this.$element.find('.link-form'), link);
 	}
 
 	populateContent(event) {
-		let value = event.target.value;
+		let value = event.currentTarget.value;
 		
 		this.contentList.empty();
 		
