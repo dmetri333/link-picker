@@ -112,6 +112,7 @@
 .link-picker  .existing-content .results-list {
     border: 1px solid #CCC;
     height: 200px;
+    overflow-x: scroll;
 }
 
 .link-picker .existing-content .results-list input {
