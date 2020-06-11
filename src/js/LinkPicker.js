@@ -30,7 +30,7 @@ class LinkPicker {
 		this.$element.on('click', '[data-action=close]', this.close.bind(this));
 		this.$element.on('click', '[data-action=add-link]', this.addLink.bind(this));
 		this.$element.on('input', '[data-action=search-content]', this.populateContent.bind(this));
-		this.$element.on('click', '.results-list li', this.selectLink.bind(this));
+		this.$element.on('click', '[data-action=select-link]', this.selectLink.bind(this));
 	}
 	
 	open() {
@@ -86,8 +86,8 @@ class LinkPicker {
 				
 					html += Util.supplant(this.options.templates.existingContentItem, { 
 						text: link.text,
-						subtext: link.url,
-						url: link.url
+						url: link.url,
+						type: 'content'
 					});
 				}
 
@@ -109,8 +109,8 @@ class LinkPicker {
 		$('[data-structure=container]').each(function(index, item) {
 			html += Util.supplant(this.options.templates.existingContentItem, { 
 				text: 'Container ' + index,
-				subtext: item.id,
-				url: '#'+item.id
+				url: '#'+item.id,
+				type: 'section'
 			});
 		}.bind(this));
 
@@ -128,13 +128,6 @@ LinkPicker.DEFAULTS = {
 	enableExistingContent: false,
 	templates: {
 		container: `<div class="link-picker fade"></div>`,
-		linkItem: `
-			<li class="link-item">
-				<input type="hidden" class="item-permalink" value="{{url}}">
-				<span class="item-title">{{title}}</span>
-				<span class="item-info">{{info}}</span>
-			</li>
-			`,
 		modal: `
 			<div class="link-picker-dialog">
 				<div class="link-picker-content">
@@ -220,7 +213,9 @@ LinkPicker.DEFAULTS = {
 				
 			</div>
 		`,
-		existingContentItem: `<li class="text-truncate" data-text="{{text}}" data-url="{{url}}">{{text}}  <em class="text-muted small">{{subtext}}</em></li>`
+		existingContentItem: `	<li class="text-truncate" data-action="select-link" data-text="{{text}}" data-url="{{url}}">
+									{{text}}  <em class="text-muted small">{{url}}</em>
+								</li>`
 	}
 }
 
