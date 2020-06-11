@@ -82,8 +82,10 @@ class LinkPicker {
 				
 				let html = '';
 				for (let i = 0; i < response.length; i++) {
+					response[i].tab = 'content';
+					
 					let link = this.options.mapData(response[i]);
-				
+					
 					html += Util.supplant(this.options.templates.existingContentItem, link);
 				}
 
@@ -105,7 +107,8 @@ class LinkPicker {
 		$('[data-structure=container]').each(function(index, item) {
 			html += Util.supplant(this.options.templates.existingContentItem, { 
 				text: 'Container ' + index,
-				url: '#'+item.id
+				url: '#'+item.id,
+				tab: 'section'
 			});
 		}.bind(this));
 
