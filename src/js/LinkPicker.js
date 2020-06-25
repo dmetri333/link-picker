@@ -79,12 +79,13 @@ class LinkPicker {
 			data: { q: value },
 			dataType: 'json',
 			success: function (response) {
+				let data = response.error.status ? [] : response.data;
 				
 				let html = '';
-				for (let i = 0; i < response.length; i++) {
-					response[i].tab = 'content';
+				for (let i = 0; i < data.length; i++) {
+					data[i].tab = 'content';
 					
-					let link = this.options.mapData(response[i]);
+					let link = this.options.mapData(data[i]);
 					
 					html += Util.supplant(this.options.templates.existingContentItem, link);
 				}
