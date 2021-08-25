@@ -31,10 +31,10 @@
     transform: translate(0, -25%);
 }
 
-.link-picker.open { 
-    opacity: 1;
+.link-picker.open {
     overflow-x: hidden;
     overflow-y: auto;
+    display: block;
 }
 
 .link-picker.open .link-picker-dialog {

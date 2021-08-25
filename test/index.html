@@ -49,26 +49,31 @@
 		
 	<script>
 
-		$('#trigger-link-picker-1').on('click', function() {
+		document.querySelector('#trigger-link-picker-1').addEventListener('click', function() {
 
 			var config = {
 				endpoint: '/test/mock/links.php',
 				enableExistingContent: true,
-				selectCallback: function(result) {
+				onSelect: function(result) {
 					console.log(result);
-				}
+				},
+				onOpen: function(result) {
+                    $(document).off('focusin.modal');
+                }
 			};
 
 			var linkPicker = new LinkPicker.LinkPicker(config);
 			linkPicker.open();
 		});
 
-        $('#trigger-link-picker-2').on('click', function() {
+		document.querySelector('#trigger-link-picker-2').addEventListener('click', function() {
 
             var config = {
-                endpoint: '/test/mock/links.js',
-                selectCallback: function(result) {
+                onSelect: function(result) {
                     console.log(result);
+                },
+				onOpen: function(result) {
+                    $(document).off('focusin.modal');
                 }
             };
 

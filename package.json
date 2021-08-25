@@ -8,28 +8,28 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-js": "webpack",
+    "css": "npm-run-all css-compile css-prefix css-compress",
+    "css-compile": "sass src/scss/linkPicker.scss dist/css/link-picker.css",
+    "css-prefix": "postcss dist/css/link-picker.css --use=autoprefixer --map=false --output=dist/css/link-picker.css",
+    "css-compress": "sass dist/css/link-picker.css dist/css/link-picker.min.css --style compressed",
+    "js": "webpack",
+    "watch-css": "watch 'npm run css' src/scss",
     "watch-js": "webpack --watch",
-    "lint-sass": "stylelint 'src/scss/*.scss'",
-    "compile-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/link-picker.css",
-    "compress-css": "node-sass dist/link-picker.css dist/link-picker.min.css --output-style compressed",
-    "build-css": "npm-run-all compile-sass compress-css",
-    "watch-sass": "node-sass --include-path scss src/scss/linkPicker.scss dist/link-picker.css --watch",
-    "watch-css": "watch 'npm run build-css' src/scss",
     "watch": "npm-run-all --parallel watch-js watch-css"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "node-sass": "^4.14.0",
+    "autoprefixer": "^10.3.2",
     "npm-run-all": "^4.1.5",
-    "stylelint": "^10.1.0",
-    "stylelint-config-standard": "^18.3.0",
+    "postcss": "^8.3.6",
+    "postcss-cli": "^8.3.1",
+    "sass": "^1.38.1",
     "watch": "^1.0.2",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "@foragefox/page-builder-util": "^1.0.5"
+    "@foragefox/doubledash": "^1.2.0"
   }
 }

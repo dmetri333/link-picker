@@ -1,11 +1,9 @@
-import Util from '@foragefox/page-builder-util';
+import __ from '@foragefox/doubledash';
 
 class LinkPicker {
 	
 	constructor(options) {
-		this.options = $.extend(true, {}, LinkPicker.DEFAULTS, typeof options == 'object' && options); 
-		
-		this.$body = $('body');
+		this.options = __.lang.extend(true, LinkPicker.DEFAULTS, typeof options == 'object' && options);
 		
 		this.initModal();
 		this.bindEvents();
@@ -13,141 +11,165 @@ class LinkPicker {
 	}
 	
 	initModal() {
-		var linkForm = Util.supplant(this.options.templates.linkForm);
-		var existingContent = this.options.enableExistingContent ? Util.supplant(this.options.templates.existingContent) : '';
-		var modal = Util.supplant(this.options.templates.modal, { linkForm: linkForm, existingContent: existingContent });
+		let modal = __.template.supplant(this.options.templates.modal, {
+			linkForm: this.options.templates.linkForm,
+			existingContent: (this.options.enableExistingContent ? this.options.templates.existingContent : '')
+		});
 
-		this.$element = $(this.options.templates.container);
-		this.$element.append(modal);
-		
-		this.$body.append(this.$element);
+		this.element = __.dom.append(modal, document.body);
 
-		this.contentList = this.$element.find('.results-list-content ul');
-		this.sectionList = this.$element.find('.results-list-section ul');
+		this.contentList = __.dom.findOne('.results-list-content ul', this.element);
+		this.sectionList = __.dom.findOne('.results-list-section ul', this.element);
+		this.linkForm = __.dom.findOne('.link-form', this.element);
 	}
 	
 	bindEvents() {
-		this.$element.on('click', '[data-action=close]', this.close.bind(this));
-		this.$element.on('click', '[data-action=add-link]', this.addLink.bind(this));
-		this.$element.on('input', '[data-action=search-content]', this.populateContent.bind(this));
-		this.$element.on('click', '[data-action=select-link]', this.selectLink.bind(this));
+		__.event.on(this.element, 'click', '[data-action=close]', () => this.close());
+		__.event.on(this.element, 'click', '[data-action=add-link]', () => this.addLink());
+		__.event.on(this.element, 'input', '[data-action=search-content]', (event) => this.populateContent(event));
+		__.event.on(this.element, 'click', '[data-action=select-link]', (event) => this.selectLink(event));
 	}
 	
 	open() {
 		this.populateSection();
 
-		this.$element.show().addClass('open');
-		$(document).off('focusin.modal');
+		this.element.classList.add('open');
+		
+		this.options.onOpen();
 	}
 	
 	close() {
-		this.$element.remove();
+		__.dom.remove(this.element);
+
+		this.options.onClose();
 	}
 	
 	addLink() {
-		var result = Util.formToJSON(this.$element.find('.link-form'));
-		this.options.selectCallback(result) 
+		var result = __.form.parseForm(this.linkForm);
+		this.options.onSelect(result) 
 		this.close();
 	}
 
 	populate() {
 		if (this.options.link.url) {
-			Util.formFromJSON(this.$element.find('.link-form'), this.options.link);
+			__.form.populateForm(this.linkForm, this.options.link);
 		}
 	}
 
 	selectLink(event) {
-		let item = event.currentTarget;
+		let item = event.delegateTarget;
+	
 		let link = { text: item.dataset.text, url: item.dataset.url };
 
-		Util.formFromJSON(this.$element.find('.link-form'), link);
+		__.form.populateForm(this.linkForm, link);
 	}
 
 	populateContent(event) {
-		let value = event.currentTarget.value;
+		let value = event.target.value;
 		
-		this.contentList.empty();
+		__.dom.empty(this.contentList);
 		
 		if (value.length < 3) {
 			return;
 		}
 
-		$.ajax({
-			cache: false,
-			context: this,
-			url: this.options.endpoint,
-			data: { q: value },
-			dataType: 'json',
-			success: function (response) {
-				let data = response.error.status ? [] : response.data;
-				
+		fetch(this.options.endpoint + '?' + new URLSearchParams({q: value}), {
+				headers: {
+					'Accept': 'application/json'
+				}
+			})
+			.then(this.responseHandler)
+			.then(data => {
 				let html = '';
 				for (let i = 0; i < data.length; i++) {
 					data[i].tab = 'content';
 					
 					let link = this.options.mapData(data[i]);
 					
-					html += Util.supplant(this.options.templates.existingContentItem, link);
+					html += __.template.supplant(this.options.templates.existingContentItem, link);
 				}
 
-				this.contentList.html(html);
-			},
-			error: function (error) {
-				console.log(error);
-				
-				throw error;
-			},
-		});
-
+				this.contentList.innerHTML = html;
+			})
+			.catch((error) => {
+				console.error('Error: ', error);
+			});
 	}
 
 	populateSection() {
-		this.sectionList.empty();
+		if (!this.sectionList) return;
+
+		__.dom.empty(this.sectionList);
 		
 		let html = '';
-		$('[data-structure=container]').each(function(index, item) {
-			html += Util.supplant(this.options.templates.existingContentItem, { 
-				text: 'Container ' + index,
-				url: '#'+item.id,
+		let sections = __.dom.find('[data-structure=container]');
+		for (let i = 0; i < sections.length; i++) {
+			html += __.template.supplant(this.options.templates.existingContentItem, { 
+				text: 'Container ' + i,
+				url: '#'+sections[i].id,
 				tab: 'section'
 			});
-		}.bind(this));
+		}
 
-		this.sectionList.html(html);
+		this.sectionList.innerHtml = html;
 	}
 
+	responseHandler(response) {
+
+		if (!response.ok) {
+			return Promise.reject(response.statusText);
+		}
+	
+		return response.text().then(text => {
+			const data = text && JSON.parse(text);
+
+			if (data && data.error && data.error.status) {
+				return Promise.reject(data.error.message);
+			}
+
+			if (data && data.status && data.status.error) {
+				return Promise.reject(data.status.message);
+			}
+	
+			return data.payload;
+		});
+	
+	}
 }
 
 
 LinkPicker.DEFAULTS = {
-	endpoint: '',
-	selectCallback: function(result) {},
-	mapData: function(data) { return data; },
+	endpoint: '',	
 	link: {},
 	enableExistingContent: false,
+	mapData: function(data) { return data; },
+	onSelect: function(result) { },
+	onOpen: function() { },
+	onClose: function() { },
 	templates: {
-		container: `<div class="link-picker fade"></div>`,
 		modal: `
-			<div class="link-picker-dialog">
-				<div class="link-picker-content">
+			<div class="link-picker">
+				<div class="link-picker-dialog">
+					<div class="link-picker-content">
 
-					<div class="link-picker-header">
-						<button data-action="close" type="button" class="close" aria-label="Close"><i class="lp-icon-close"></i></button>
-						<h3>Insert/edit link</h3>
-					</div>
-				
-					<div class="link-picker-body">
-						{{linkForm}}
-						{{existingContent}}
-					</div>
+						<div class="link-picker-header">
+							<button data-action="close" type="button" class="close" aria-label="Close"><i class="lp-icon-close"></i></button>
+							<h3>Insert/edit link</h3>
+						</div>
+					
+						<div class="link-picker-body">
+							{{& linkForm}}
+							{{& existingContent}}
+						</div>
 
-					<div class="link-picker-footer">
-						<button data-action="close" class="btn btn-link">Cancel</button>
-						<button data-action="add-link" class="btn btn-primary">Add Link</button>
-					</div>
+						<div class="link-picker-footer">
+							<button data-action="close" class="btn btn-link">Cancel</button>
+							<button data-action="add-link" class="btn btn-primary">Add Link</button>
+						</div>
 
+					</div>
 				</div>
-			</div>
+			</div>	
 		`,
 		linkForm: `
 			<div class="link-form">
