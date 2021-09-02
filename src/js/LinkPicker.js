@@ -111,7 +111,7 @@ class LinkPicker {
 			});
 		}
 
-		this.sectionList.innerHtml = html;
+		this.sectionList.innerHTML = html;
 	}
 
 	responseHandler(response) {
@@ -131,7 +131,7 @@ class LinkPicker {
 				return Promise.reject(data.status.message);
 			}
 	
-			return data.payload;
+			return data.data ? data.data : data.payload;
 		});
 	
 	}
