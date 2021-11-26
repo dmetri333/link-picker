@@ -1,9 +1,9 @@
-import __ from '@foragefox/doubledash';
+import { extend, supplant, append, findOne, find, on, remove, parseForm, populateForm, empty } from '@foragefox/doubledash';
 
 class LinkPicker {
 	
 	constructor(options) {
-		this.options = __.lang.extend(true, LinkPicker.DEFAULTS, typeof options == 'object' && options);
+		this.options = extend(true, LinkPicker.DEFAULTS, typeof options == 'object' && options);
 		
 		this.initModal();
 		this.bindEvents();
@@ -11,23 +11,23 @@ class LinkPicker {
 	}
 	
 	initModal() {
-		let modal = __.template.supplant(this.options.templates.modal, {
+		let modal = supplant(this.options.templates.modal, {
 			linkForm: this.options.templates.linkForm,
 			existingContent: (this.options.enableExistingContent ? this.options.templates.existingContent : '')
 		});
 
-		this.element = __.dom.append(modal, document.body);
+		this.element = append(modal, document.body);
 
-		this.contentList = __.dom.findOne('.results-list-content ul', this.element);
-		this.sectionList = __.dom.findOne('.results-list-section ul', this.element);
-		this.linkForm = __.dom.findOne('.link-form', this.element);
+		this.contentList = findOne('.results-list-content ul', this.element);
+		this.sectionList = findOne('.results-list-section ul', this.element);
+		this.linkForm = findOne('.link-form', this.element);
 	}
 	
 	bindEvents() {
-		__.event.on(this.element, 'click', '[data-action=close]', () => this.close());
-		__.event.on(this.element, 'click', '[data-action=add-link]', () => this.addLink());
-		__.event.on(this.element, 'input', '[data-action=search-content]', (event) => this.populateContent(event));
-		__.event.on(this.element, 'click', '[data-action=select-link]', (event) => this.selectLink(event));
+		on(this.element, 'click', '[data-action=close]', () => this.close());
+		on(this.element, 'click', '[data-action=add-link]', () => this.addLink());
+		on(this.element, 'input', '[data-action=search-content]', (event) => this.populateContent(event));
+		on(this.element, 'click', '[data-action=select-link]', (event) => this.selectLink(event));
 	}
 	
 	open() {
@@ -39,20 +39,20 @@ class LinkPicker {
 	}
 	
 	close() {
-		__.dom.remove(this.element);
+		remove(this.element);
 
 		this.options.onClose();
 	}
 	
 	addLink() {
-		var result = __.form.parseForm(this.linkForm);
+		var result = parseForm(this.linkForm);
 		this.options.onSelect(result) 
 		this.close();
 	}
 
 	populate() {
 		if (this.options.link.url) {
-			__.form.populateForm(this.linkForm, this.options.link);
+			populateForm(this.linkForm, this.options.link);
 		}
 	}
 
@@ -61,13 +61,13 @@ class LinkPicker {
 	
 		let link = { text: item.dataset.text, url: item.dataset.url };
 
-		__.form.populateForm(this.linkForm, link);
+		populateForm(this.linkForm, link);
 	}
 
 	populateContent(event) {
 		let value = event.target.value;
 		
-		__.dom.empty(this.contentList);
+		empty(this.contentList);
 		
 		if (value.length < 3) {
 			return;
@@ -86,7 +86,7 @@ class LinkPicker {
 					
 					let link = this.options.mapData(data[i]);
 					
-					html += __.template.supplant(this.options.templates.existingContentItem, link);
+					html += supplant(this.options.templates.existingContentItem, link);
 				}
 
 				this.contentList.innerHTML = html;
@@ -99,12 +99,12 @@ class LinkPicker {
 	populateSection() {
 		if (!this.sectionList) return;
 
-		__.dom.empty(this.sectionList);
+		empty(this.sectionList);
 		
 		let html = '';
-		let sections = __.dom.find('[data-structure=container]');
+		let sections = find('[data-structure=container]');
 		for (let i = 0; i < sections.length; i++) {
-			html += __.template.supplant(this.options.templates.existingContentItem, { 
+			html += supplant(this.options.templates.existingContentItem, { 
 				text: 'Container ' + i,
 				url: '#'+sections[i].id,
 				tab: 'section'
